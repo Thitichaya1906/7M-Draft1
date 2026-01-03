@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Universe Journey 🚀</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --sky: #090A0F; --pastel-blue: #A7C7E7; --deep-blue: #5B9BD5; }
+        body, html { margin: 0; padding: 0; font-family: 'Mali', cursive; background: var(--sky); color: white; overflow: hidden; }
+
+        /* --- Passcode Styles --- */
+        #passcode-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--pastel-blue); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 9999; color: #333;
+        }
+        .pass-box { 
+            background: white; padding: 30px; border-radius: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 80%; max-width: 400px;
+        }
+        .pass-input-group { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .pass-input-group input { 
+            width: 40px; height: 50px; text-align: center; font-size: 24px; 
+            border: 2px solid var(--pastel-blue); border-radius: 10px; font-family: 'Mali';
+        }
+        .hint { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+        .confirm-btn { 
+            background: var(--deep-blue); color: white; border: none; 
+            padding: 10px 30px; border-radius: 20px; font-family: 'Mali'; font-weight: bold; cursor: pointer;
+        }
+
+        /* --- Animations --- */
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%); }
+            20% { transform: translate(-52%, -51%) rotate(-1deg); }
+            40% { transform: translate(-48%, -49%) rotate(1deg); }
+            60% { transform: translate(-51%, -52%) rotate(-1deg); }
+            80% { transform: translate(-49%, -48%) rotate(1deg); }
+        }
+        @keyframes launchUp {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -150vh) scale(0.5); opacity: 0; }
+        }
+        @keyframes flyInRight {
+            0% { transform: translate(-150vw, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        
+        /* --- General Scenes --- */
+        .scene { height: 100vh; width: 100vw; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; }
+        .active { display: flex; }
+        .stars { position: absolute; top: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); opacity: 0.3; pointer-events: none; }
+        #ship-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; display: none; }
+        .ship-img { width: 100px; }
+        .shaking { animation: shake 0.2s infinite; }
+        .launching { animation: launchUp 1.5s forwards ease-in; }
+        .entering { animation: flyInRight 1.5s forwards ease-out; }
+        .floating { animation: float 3s ease-in-out infinite; }
+        .quiz-box, .msg-box { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 25px; border-radius: 20px; width: 85%; max-width: 450px; border: 1px solid rgba(255,255,255,0.3); z-index: 10; }
+        .choice-btn { display: block; width: 100%; background: white; color: #333; border: none; padding: 10px; margin: 10px 0; border-radius: 12px; cursor: pointer; font-family: 'Mali'; font-weight: bold; }
+        .planet { width: 250px; margin-bottom: 20px; animation: float 4s ease-in-out infinite; }
+        .evidence-img { max-width: 90%; max-height: 50vh; border: 4px solid white; border-radius: 15px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="passcode-screen">
+        <div class="pass-box">
+            <h2>กรอกรหัสผ่าน</h2>
+            <p class="hint">คำใบ้ : วันครบรอบ</p>
+            <div class="pass-input-group">
+                <input type="password" maxlength="1" class="p-in">
+                <input type="password" maxlength="1" class="p-in">
+                <input type="password" maxlength="1" class="p-in">
+                <input type="password" maxlength="1" class="p-in">
+                <input type="password" maxlength="1" class="p-in">
+                <input type="password" maxlength="1" class="p-in">
+            </div>
+            <button class="confirm-btn" onclick="checkPasscode()">ยืนยัน</button>
+        </div>
+    </div>
+
+    <div id="player"></div>
+
+    <div id="ship-container">
+        <img src="spaceship.png" id="main-ship" class="ship-img">
+    </div>
+
+    <div id="scene-moon" class="scene">
+        <div class="stars"></div>
+        <img src="moon.png" class="planet">
+        <div id="quiz-ui" class="quiz-box">
+            <div id="question-area">
+                <p>ยินดีต้อนรับสู่การเดินทาง! กดเพื่อรับภารกิจ</p>
+                <button class="choice-btn" onclick="loadNextQuestion()">รับภารกิจ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="scene-jupiter" class="scene">
+        <div class="stars"></div>
+        <img src="jupiter.png" id="jupiter-planet" class="planet">
+        <div id="jupiter-content" class="quiz-box">
+            <h3 id="j-title">เจอหลักฐานสำคัญ!</h3>
+            <img id="evidence-display" class="evidence-img" style="display:none;">
+            <p id="j-caption"></p>
+            <button class="choice-btn" id="j-btn" onclick="handleJupiter()">แตะเพื่อสำรวจ</button>
+        </div>
+    </div>
+
+    <div id="scene-saturn" class="scene">
+        <div class="stars"></div>
+        <img src="saturn.png" class="planet">
+        <div class="msg-box">
+            <p style="font-size: 0.9rem;">ครบรอบเจ็ดเดือนแบ้วน้ะแฟน หนูรักแฟนมาก ๆ เลยนะ ขอให้ปีนี้เป็นตลอดทั้งปีที่ดี พักผ่อนเย้อ เย้อ ไม่หักโหม ไม่เหนื่อยมากน้ะแฟน ยิ้มเย้อเย้อ มีแต่อะไรดีดีเข้ามาเย้อเย้อเบย อันนี้หนูตั้งใจมากเลยนะ ทั้งตั้งแต่วันที่สอง ขอให้แฟนอยุ่กะบหนุนาน ๆ เบย ❤️</p>
+            <button class="choice-btn" onclick="finalLaunch()">แตะเพื่อไปต่อ</button>
+        </div>
+    </div>
+
+    <div id="scene-end" class="scene">
+        <div class="stars"></div>
+        <img src="earth.png" style="width:200px; margin-bottom: 50px;">
+        <h1>กลับถึงโลกแล้วนะ..</h1>
+        <p>ขอบคุณที่ร่วมเดินทางไปด้วยกันนะ ❤️</p>
+    </div>
+
+    <script>
+        // ระบบรหัสผ่าน
+        const inputs = document.querySelectorAll('.p-in');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
+            });
+        });
+
+        function checkPasscode() {
+            let code = Array.from(inputs).map(i => i.value).join('');
+            if (code === "190668") {
+                document.getElementById('passcode-screen').style.display = 'none';
+                startLaunch();
+            } else {
+                alert("รหัสไม่ถูกต้อง ลองใหม่อีกครั้งนะ!");
+                inputs.forEach(i => i.value = "");
+                inputs[0].focus();
+            }
+        }
+
+        // ระบบการเดินทางเดิม
+        let currentQ = 0; let score = 0; let currentEvidence = 0;
+        const questions = [
+            { q: "เราเจอกันครั้งแรกวันที่เท่าไหร่?", a: ["28 กุมภาพันธ์ 2568", "20 พฤษภาคม 2568", "28 มีนาคม 2568", "18 มกราคม 2568"], c: 0 },
+            { q: "หนูเกิดวันที่เท่าไหร่ เดือนอะไร ปีอะไร?", a: ["9 กันยายน 2553", "9 กันยายน 2552", "9 กันยายน 2554", "9 มกราคม 2552"], c: 0 },
+            { q: "โครงการห้องเรียนพิเศษที่หนูเรียนอยู่ สะกดยังไง?", a: ["G - MATH", "G - MATHS", "G - MATHSS", "G - MATHSSS"], c: 1 },
+            { q: "พอดแคสต์ที่หนูชอบฟัง?", a: ["the ghost radio", "อวกาศคาดไม่ถึง", "ทฤษฎีสมทบคิด (พี่เผือก)", "ความ (ไม่) รู้รอบตัว"], c: 1 },
+            { q: "ชื่อ IG หนู สะกดยังไง?", a: ["sun_folwerrrr", "sun_folwerrr", "sun_.f0lwerrr", "sun_.f0lwerrrr"], c: 3 }
+        ];
+
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', { height: '0', width: '0', videoId: 'kdgRgJ478OY' });
+        }
+        var tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0]; firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        function startLaunch() {
+            if(player) player.playVideo();
+            const shipContainer = document.getElementById('ship-container');
+            const ship = document.getElementById('main-ship');
+            shipContainer.style.display = 'block';
+            ship.classList.add('shaking');
+            setTimeout(() => {
+                ship.classList.replace('shaking', 'launching');
+                setTimeout(() => {
+                    changeScene('none', 'scene-moon');
+                    ship.classList.replace('launching', 'entering');
+                    setTimeout(() => { ship.classList.replace('entering', 'floating'); }, 1500);
+                }, 1400);
+            }, 1000);
+        }
+
+        function loadNextQuestion() {
+            if (currentQ < 5) {
+                let q = questions[currentQ];
+                let btns = q.a.map((ans, i) => `<button class="choice-btn" onclick="handleAnswer(${i})">${ans}</button>`).join('');
+                document.getElementById('question-area').innerHTML = `<h3>ข้อที่ ${currentQ+1}</h3><p>${q.q}</p>${btns}`;
+            } else { showResult(); }
+        }
+
+        function handleAnswer(idx) {
+            if (idx === questions[currentQ].c) score += 20;
+            currentQ++;
+            loadNextQuestion();
+        }
+
+        function showResult() {
+            document.getElementById('question-area').innerHTML = `<h3>ภารกิจสำเร็จ!</h3><p>ไปสำรวจดาวดวงต่อไปกัน</p><button class="choice-btn" onclick="transitionTo('scene-moon', 'scene-jupiter')">แตะเพื่อไปต่อ</button>`;
+        }
+
+        function transitionTo(oldS, newS) {
+            const ship = document.getElementById('main-ship');
+            ship.classList.replace('floating', 'shaking');
+            setTimeout(() => {
+                ship.classList.replace('shaking', 'launching');
+                setTimeout(() => {
+                    changeScene(oldS, newS);
+                    ship.classList.replace('launching', 'entering');
+                    setTimeout(() => { ship.classList.replace('entering', 'floating'); }, 1500);
+                }, 1400);
+            }, 800);
+        }
+
+        function handleJupiter() {
+            const imgs = ['love1.jpg', 'love2.jpg', 'love3.jpg', 'love4.jpg', 'love5.jpg'];
+            if (currentEvidence < 5) {
+                document.getElementById('jupiter-planet').style.display = 'none';
+                document.getElementById('evidence-display').src = imgs[currentEvidence];
+                document.getElementById('evidence-display').style.display = 'block';
+                document.getElementById('j-title').style.display = 'none';
+                document.getElementById('j-caption').innerText = `รูปที่ ${currentEvidence+1}/5`;
+                document.getElementById('j-btn').innerText = 'ดูรูปถัดไป';
+                currentEvidence++;
+            } else {
+                transitionTo('scene-jupiter', 'scene-saturn');
+            }
+        }
+
+        function finalLaunch() {
+            transitionTo('scene-saturn', 'scene-end');
+        }
+
+        function changeScene(oldId, newId) {
+            if(oldId !== 'none') document.getElementById(oldId).classList.remove('active');
+            document.getElementById(newId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
